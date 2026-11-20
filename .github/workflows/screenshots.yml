@@ -1,0 +1,40 @@
+name: screenshots
+
+# Run by hand (Actions → screenshots → Run workflow). Builds a Debug app for the watchOS simulator,
+# shoots it on three watch sizes with scripts/screenshots.sh and uploads the PNGs as an artifact.
+on:
+  workflow_dispatch:
+
+jobs:
+  shots:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: watchOS simulator runtime
+        run: |
+          xcodebuild -version
+          if ! xcrun simctl list runtimes | grep -q "watchOS"; then
+            xcodebuild -downloadPlatform watchOS
+          fi
+          xcrun simctl list runtimes
+
+      - name: Build for the watchOS simulator
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Tactus.xcodeproj \
+            -scheme Tactus \
+            -configuration Debug \
+            -destination 'generic/platform=watchOS Simulator' \
+            -derivedDataPath build \
+            | tail -20
+
+      - name: Take screenshots
+        run: bash scripts/screenshots.sh build/Build/Products/Debug-watchsimulator/Tactus.app shots
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: shots/

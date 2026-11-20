@@ -53,7 +53,20 @@ struct MetronomeView: View {
                 }
             }
         }
+        #if DEBUG
+        .task { await autostartForScreenshots() }
+        #endif
     }
+
+    #if DEBUG
+    /// Screenshot hook, Debug builds only. Launching with `-tactus.autostart YES` starts playing a second after
+    /// launch. `scripts/screenshots.sh` uses it because a simulator can't be tapped from the command line.
+    private func autostartForScreenshots() async {
+        guard UserDefaults.standard.bool(forKey: "tactus.autostart") else { return }
+        try? await Task.sleep(for: .seconds(1))
+        metronome.start()
+    }
+    #endif
 
     // MARK: - Pieces
 

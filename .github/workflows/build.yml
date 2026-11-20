@@ -12,7 +12,7 @@ jobs:
     name: Core tests (swift test)
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: swift --version
       - run: swift test
 
@@ -20,7 +20,7 @@ jobs:
     name: Watch app (xcodebuild)
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Xcode and watchOS SDKs on this runner
         run: |
           xcodebuild -version
