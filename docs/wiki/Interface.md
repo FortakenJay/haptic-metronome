@@ -1,0 +1,54 @@
+# Interface
+
+One screen, two inputs: **the crown sets the tempo, a tap starts and stops it.** Everything else on the screen
+is there so you can read the state at a glance without looking for more than a second, mid-practice.
+
+```
+            ◷ 10:09        ✋     ← feel: Light (outline) / Strong (filled)
+          ╭───────────╮
+         │    120     │          ← tempo, rounded digits, fixed width
+         │    BPM     │
+         │  Allegro   │          ← Italian marking for this tempo
+          ╰───────────╯          ← ring: grey when stopped, amber when playing, flashes on each beat
+          ■ Tap to stop          ← what a tap will do; icon and words change with state
+```
+
+## Rules the screen follows
+
+These come from the `better-ui`, `better-accessibility`, `better-typography` and `better-colors` skills used in
+other repos (web rules, adapted to watchOS). The table shows the rule, how it applies here, and where it lives.
+
+| Rule | Here | Where |
+|---|---|---|
+| High-frequency interactions respond instantly | The crown changes the number with no animation; it's turned dozens of times in a row | `MetronomeView.dial` (no transition on the `Text`) |
+| Tabular numbers on changing values | `.monospacedDigit()` on the tempo, so 111 → 112 never shifts the digits sideways | `MetronomeView.dial` |
+| Motion is never the only feedback | Playing changes the ring colour, the icon (▶ → ■) **and** the words (*Tap to start* → *Tap to stop*) | `MetronomeView.status`, `trackColor` |
+| Colour is never the only cue | Amber means playing, but the icon and label say it too; Light vs Strong is outline vs filled hand **and** a spoken value | `status`, toolbar button |
+| Press scales to 0.96 over 150 ms, ease-out | The whole screen gives slightly under your finger | `PressStyle` |
+| Honour Reduce Motion | With Reduce Motion on, the beat ring only fades (no scale), the press fades instead of scaling, and the play/stop icon cross-fades instead of morphing | `reduceMotion` in `dial`, `PressStyle`, `status` |
+| Cross-fade contextual icons on infrequent state changes | Play ↔ stop uses `.symbolEffect(.replace)` | `MetronomeView.status` |
+| Expressive motion only for infrequent moments | The beat flash is the one animation that repeats, and it is short: 0.21 s in total, under one beat at the 240 BPM ceiling (0.25 s), so flashes never overlap | `dial` keyframes |
+| Every control has an accessible name | Main button: *Start metronome* / *Stop metronome*. Feel button: *Beat feel*, value *Light* / *Strong* | `.accessibilityLabel` / `.accessibilityValue` |
+| Every pointer interaction has a non-pointer path | VoiceOver swipe up/down changes tempo by one BPM (the crown's job); double-tap starts and stops | `.accessibilityAdjustableAction` → `Metronome.step(by:)` |
+| A hit area as big as the job | The whole screen is the start/stop target, not just the label | `.contentShape(Rectangle())` on the full-size label |
+| An error names the way out | If it stops on its own, the reason (*Stopped after an hour*, *Stopped when you left*) sits right above *Tap to start* | `MetronomeView.status` |
+| One accent colour, one meaning | Amber (`#FFB020`, `AccentColor`) means *playing*. Nothing else uses it | `Assets.xcassets/AccentColor` |
+| Outline for default, fill for active | Light feel is `hand.tap`, Strong is `hand.tap.fill` | toolbar button |
+
+## Small things that are deliberate
+
+- **Crown clicks go quiet while playing.** `isHapticFeedbackEnabled: !metronome.isPlaying`. Otherwise you'd feel
+  the crown's detents mixed in with the beats while adjusting the tempo.
+- **No focus ring.** The crown needs a focused view, and watchOS draws a ring around it. On a one-screen app that
+  ring is noise, so it's off (`.focusEffectDisabled()`).
+- **Switching the feel plays a sample** when stopped, so you know what you picked without starting the metronome.
+  While playing, the next beat is the sample.
+- **Always On.** When the screen dims, the beat ring is hidden and the dial fades to 60 %. There's nothing to
+  watch, and less drawing means less CPU, which keeps watchOS from ending the session for using too much.
+
+## What wasn't checked
+
+- How it looks on every watch size. The dial is drawn with `aspectRatio(1, contentMode: .fit)` and the number
+  scales down to 50 % if needed, so it should fit 40 mm to 49 mm. It hasn't been captured on each yet.
+- Contrast of the grey ring when stopped. It's decoration (the label carries the state), but the pair hasn't been
+  measured.

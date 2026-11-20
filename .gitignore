@@ -1,0 +1,15 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+
+# Swift Package Manager (the test package)
+.build/
+.swiftpm/
+
+# graphify working files; the published graph lives in docs/graph/
+graphify-out/
+
+# macOS
+.DS_Store

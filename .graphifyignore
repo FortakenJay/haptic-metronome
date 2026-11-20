@@ -1,0 +1,3 @@
+# The published graph and CI config are not part of the map.
+docs/graph/
+.github/

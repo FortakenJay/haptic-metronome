@@ -1,0 +1,40 @@
+name: build
+
+# Builds the watch app and runs the timing tests on a Mac runner, so every push is checked
+# the same way, whatever machine wrote it.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  core-tests:
+    name: Core tests (swift test)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift --version
+      - run: swift test
+
+  watch-app:
+    name: Watch app (xcodebuild)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode and watchOS SDKs on this runner
+        run: |
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i watch || true
+      - name: Build for watchOS (no signing)
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Tactus.xcodeproj \
+            -scheme Tactus \
+            -configuration Debug \
+            -destination 'generic/platform=watchOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee build.log
+      - name: Warnings in our own code
+        if: always()
+        run: grep -E "Tactus/.*(warning|error):" build.log | sort -u || echo "none"

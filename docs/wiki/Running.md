@@ -1,0 +1,57 @@
+# Running it
+
+## On your watch
+
+You need a Mac with **Xcode 16 or later**, an Apple Watch on **watchOS 10 or later**, and its paired iPhone. A free
+Apple ID is enough.
+
+```bash
+git clone https://github.com/FortakenJay/haptic-metronome.git
+cd haptic-metronome
+open Tactus.xcodeproj
+```
+
+1. **Signing.** Select the **Tactus** target → **Signing & Capabilities** → **Team** → your Apple ID
+   (*Personal Team*). Leave *Automatically manage signing* on.
+2. **Bundle identifier.** If Xcode says `com.fortakenjay.tactus` is unavailable, change it to something only you
+   would use, like `com.yourname.tactus`.
+3. **Developer Mode.** Connect the iPhone to the Mac (cable, or the same Wi-Fi once paired). Then on the iPhone
+   *and* on the watch: Settings → Privacy & Security → Developer Mode → on. Each device restarts.
+4. **Run.** Scheme **Tactus**, destination your Apple Watch, press **Run** (⌘R). The first install to a watch
+   can take a few minutes.
+
+## Every 7 days
+
+A free Personal Team signs apps for 7 days. After that, Tactus won't open. Connect the iPhone and press **Run**
+again. Nothing is lost: tempo and feel are saved on the watch.
+
+## Tests
+
+```bash
+swift test
+```
+
+Runs the 12 tests in `Tests/TactusCoreTests` (beat clock and tempo rules) on the Mac. No watch or simulator
+needed. GitHub Actions runs them, plus a full `xcodebuild` of the watch app, on every push
+(`.github/workflows/build.yml`).
+
+## The simulator
+
+Choose any Apple Watch simulator as the destination and Run. The crown is your mouse's scroll wheel or trackpad
+scroll. **The simulator has no Taptic Engine**, so you'll see the ring flash but feel nothing. Check the feel on a
+real watch.
+
+## When it goes wrong
+
+| What you see | What it means | Fix |
+|---|---|---|
+| *Signing for "Tactus" requires a development team* | No Team picked | Step 1 above |
+| *Failed to register bundle identifier* / *not available* | Someone else's app already has `com.fortakenjay.tactus` | Step 2: change the bundle identifier |
+| *Your development team has reached the maximum number of registered devices* | A free team allows 3 devices per platform, for 7 days | Wait for one to expire, or use a paid account |
+| The destination menu doesn't list the watch | Not paired, locked, or Developer Mode off | Unlock the watch, keep it on the charger near the iPhone, check step 3 |
+| The app opened before but now won't | The 7-day signing ran out | Run again from Xcode |
+| *Untrusted Developer* on first launch | iOS hasn't trusted your Apple ID yet | On the iPhone: Settings → General → VPN & Device Management → your Apple ID → Trust |
+| Beats stop when you lower your wrist | The background session didn't start or was ended | Check `Support/Info.plist` still has `WKBackgroundModes` → `mindfulness`. Pressing the crown or opening another app also ends it, by design |
+| *Stopped after an hour* | The mindfulness session's 1-hour limit | Tap to start again |
+| Beats blur together at fast tempos | The haptic takes about as long as the gap between beats | Switch to **Light** (hand button, top right) |
+| `swift test` can't find XCTest | Command Line Tools without Xcode | `sudo xcode-select -s /Applications/Xcode.app` |
