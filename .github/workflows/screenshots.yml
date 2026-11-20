@@ -1,9 +1,13 @@
 name: screenshots
 
 # Run by hand (Actions → screenshots → Run workflow). Builds a Debug app for the watchOS simulator,
-# shoots it on three watch sizes with scripts/screenshots.sh and uploads the PNGs as an artifact.
+# shoots it on three watch sizes with scripts/screenshots.sh, uploads the PNGs as an artifact and
+# force-pushes them to the `screenshots` branch (raw frames; the curated ones live in docs/img/).
 on:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   shots:
@@ -38,3 +42,15 @@ jobs:
         with:
           name: screenshots
           path: shots/
+
+      - name: Publish to the screenshots branch
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd shots
+          git init -q -b screenshots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Raw screenshots from run ${{ github.run_id }} at ${{ github.sha }}"
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.git" screenshots

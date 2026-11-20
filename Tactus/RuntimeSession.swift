@@ -29,10 +29,14 @@ final class RuntimeSession: NSObject {
     }
 
     /// Ends the session because the user stopped the metronome.
+    ///
+    /// Invalidates in every state except `.invalid`, including `.notStarted`: `start()` is asynchronous, so a
+    /// quick start-stop (or a simulator, where the session may never reach `.running`) can catch it before it
+    /// runs. Releasing a started session without invalidating it makes watchOS log "dealloced while running".
     func end() {
         guard let current = session else { return }
         session = nil   // forget it first, so its own invalidation callback is ignored
-        if current.state == .running || current.state == .scheduled {
+        if current.state != .invalid {
             current.invalidate()
         }
     }
