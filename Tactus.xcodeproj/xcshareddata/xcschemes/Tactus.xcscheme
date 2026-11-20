@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1600"
+   LastUpgradeVersion = "2720"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -45,7 +45,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7A0000000000000000000006"
             BuildableName = "Tactus.app"
-            BlueprintName = "Tactus"
             ReferencedContainer = "container:Tactus.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,7 +61,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7A0000000000000000000006"
             BuildableName = "Tactus.app"
-            BlueprintName = "Tactus"
             ReferencedContainer = "container:Tactus.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
