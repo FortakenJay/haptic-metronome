@@ -2,7 +2,7 @@
 
 `docs/graph/` holds a knowledge graph of the project, built by
 [graphify](https://github.com/safishamsi/graphify) from the code's syntax trees and the docs' headings and links
-(no AI service involved): **169 nodes, 276 edges, 13 communities** across the Swift sources, the
+(no AI service involved): **174 nodes, 283 edges, 15 communities** across the Swift sources, the
 tests, the README and these wiki pages.
 
 - `graph.html`: open it in a browser to explore. Nodes are types, functions, files and doc sections; edges are
@@ -20,7 +20,7 @@ The most connected nodes are the spine of the app, and they match the design:
 | `BeatClock` | 22 | The schedule: when the next beat is due (`BeatClock.swift`) |
 | `Feel` | 18 | Light or Strong, and its haptic (`Feel.swift`) |
 | `RuntimeSession` | 17 | Keeps the app running with the wrist down (`RuntimeSession.swift`) |
-| `MetronomeView` | 16 | The one screen: crown, tap, ring, accessibility (`MetronomeView.swift`) |
+| `MetronomeView` | 17 | The one screen: crown, tap, ring, accessibility (`MetronomeView.swift`) |
 | `TempoTests` | 10 | Tempo rules under test (`TempoTests.swift`) |
 | `.beatPlayed()` | 9 | Advance after a beat; skip after a stall (`BeatClock.swift`) |
 | `BeatClockTests` | 9 | Clock rules under test (`BeatClockTests.swift`) |

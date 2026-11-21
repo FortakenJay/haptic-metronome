@@ -1,6 +1,6 @@
 # Tactus: Architecture
 
-Status: **v1.0** (2026-11-20). One watch-only target, watchOS 10+. 12 core tests (`swift test`); the watch app is
+Status: **v1.0** (2026-11-20). One watch-only target, minimum watchOS 26.6 (the code needs 10). 12 core tests (`swift test`); the watch app is
 built by GitHub Actions on every push. Not yet felt on hardware at every tempo (see *Open* at the end).
 
 ## Layers

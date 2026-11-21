@@ -13,6 +13,10 @@ is there so you can read the state at a glance without looking for more than a s
           ■ Tap to stop          ← what a tap will do; icon and words change with state
 ```
 
+On three watch sizes (simulator; 40 mm SE, 46 mm Series 10, 49 mm Ultra 2), playing at 120 BPM:
+
+![Tactus on three watch sizes](../img/sizes.png)
+
 ## Rules the screen follows
 
 These come from the `better-ui`, `better-accessibility`, `better-typography` and `better-colors` skills used in
@@ -48,7 +52,8 @@ other repos (web rules, adapted to watchOS). The table shows the rule, how it ap
 
 ## What wasn't checked
 
-- How it looks on every watch size. The dial is drawn with `aspectRatio(1, contentMode: .fit)` and the number
-  scales down to 50 % if needed, so it should fit 40 mm to 49 mm. It hasn't been captured on each yet.
+- Watch sizes between the three captured above (41, 42, 44, 45 mm). The dial is drawn with
+  `aspectRatio(1, contentMode: .fit)` and fits 40 mm and 49 mm without scaling the number, so the sizes between
+  should too.
 - Contrast of the grey ring when stopped. It's decoration (the label carries the state), but the pair hasn't been
   measured.

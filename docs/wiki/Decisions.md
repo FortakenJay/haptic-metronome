@@ -7,7 +7,7 @@ What was chosen, what it was chosen over, and why.
 | Decision | Chosen | Instead of | Why |
 |---|---|---|---|
 | App shape | Watch-only app, one target | iPhone app with a watch extension | Nothing on the phone has a job. One target is less to sign and less to install |
-| Minimum watchOS | 10.0 | 9 or earlier | `@Observable`, `keyframeAnimator`, `focusEffectDisabled` and top-bar toolbar items all need 10. watchOS 10 runs on Series 4 and later |
+| Minimum watchOS | 26.6 in the project; the code needs 10 | 10.0 | Set to match Jih's watch (26.6). Nothing in the code needs 26: `@Observable`, `keyframeAnimator`, `focusEffectDisabled` and top-bar toolbar items need 10. To run on an older watch, lower *Minimum Deployments* on the Tactus target. The screenshot workflow builds with 10.0 because GitHub's newest watch simulator is 26.2 |
 | Xcode project format | Folder-synced groups (Xcode 16) | A file list in the project | New Swift files in `Tactus/` are picked up without editing `project.pbxproj` |
 | Distribution | Free Personal Team, re-run every 7 days | Paid Apple Developer account | It's a personal tool. Paying only makes sense for the App Store or TestFlight |
 | Checking the build | GitHub Actions on a macOS runner | Only building on a laptop | Every push gets the same compiler and the same tests, whoever wrote it |
@@ -55,5 +55,6 @@ What was chosen, what it was chosen over, and why.
 
 | Decision | Chosen | Instead of | Why |
 |---|---|---|---|
+| Screenshots | Watch simulator on a GitHub runner, driven by launch arguments and a Debug-only autostart | A UI-test target that taps the screen | One script and no second target in the project. The cost is the flaky states listed in *Running it* |
 | Graph | `docs/graph/` from graphify's syntax-tree pass (no AI service) | No graph, or an LLM-built one | Same as MarsWalk. Reproducible with `graphify update .` |
 | Docs | README + `docs/wiki/` + `docs/ARCHITECTURE.md` | One long README | The README is the story; the wiki holds the details for whoever needs them |

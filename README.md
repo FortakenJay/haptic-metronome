@@ -4,7 +4,12 @@
 
 [![build](https://github.com/FortakenJay/haptic-metronome/actions/workflows/build.yml/badge.svg)](https://github.com/FortakenJay/haptic-metronome/actions/workflows/build.yml)
 
-<img src="Tactus/Assets.xcassets/AppIcon.appiconset/AppIcon.png" alt="Tactus icon: an amber ring around a beat dot" width="120">
+<p align="center">
+  <img src="docs/img/hero.png" alt="Tactus on a 46 mm Apple Watch: stopped at 100 BPM, Andante, and playing at 120 BPM, Allegro, with the amber ring lit on a beat" width="600">
+</p>
+
+<sub>Watch simulator, Series 10 (46 mm). Left: stopped. Right: playing, caught on a beat. The red icon next to the clock is the
+simulator saying no iPhone is connected; it isn't part of the app.</sub>
 
 ---
 
@@ -66,7 +71,7 @@ hardware fires it. That's fine for practice. It isn't a sample-accurate click fo
 
 ## Run it on your own watch (free)
 
-You need a Mac with **Xcode 16 or later**, an Apple Watch on **watchOS 10 or later**, and the iPhone it's paired
+You need a Mac with **Xcode 16 or later**, an Apple Watch on **watchOS 26.6 or later**, and the iPhone it's paired
 with. You don't need a paid developer account.
 
 1. Open `Tactus.xcodeproj`.
@@ -100,6 +105,12 @@ into two layers, and the split is the point:
 - **The app layer** is small: `Metronome` sleeps until each planned beat and plays it, `RuntimeSession` keeps the
   app running with the wrist down, and `MetronomeView` is the one screen.
 
+The same screen on a 40 mm, 46 mm and 49 mm watch:
+
+<p align="center">
+  <img src="docs/img/sizes.png" alt="Tactus playing at 120 BPM on a 40 mm Apple Watch SE, a 46 mm Series 10 and a 49 mm Ultra 2" width="720">
+</p>
+
 | File | Job |
 |---|---|
 | `Tactus/Core/Tempo.swift` | Range, rounding, seconds per beat, Italian markings |
@@ -114,7 +125,7 @@ into two layers, and the split is the point:
 - [Interface](docs/wiki/Interface.md): the interaction and accessibility rules the screen follows, and where each lives
 - [Decisions](docs/wiki/Decisions.md): what was chosen over what, and why, by component
 - [Running it](docs/wiki/Running.md): setup and troubleshooting
-- [Knowledge graph](docs/wiki/Knowledge-graph.md): a map of the code (169 nodes), built with graphify
+- [Knowledge graph](docs/wiki/Knowledge-graph.md): a map of the code (174 nodes), built with graphify
 - [Architecture](docs/ARCHITECTURE.md): states, data flow, invariants
 
 ## What it doesn't do yet

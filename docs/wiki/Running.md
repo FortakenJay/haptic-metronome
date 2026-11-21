@@ -2,7 +2,7 @@
 
 ## On your watch
 
-You need a Mac with **Xcode 16 or later**, an Apple Watch on **watchOS 10 or later**, and its paired iPhone. A free
+You need a Mac with **Xcode 16 or later**, an Apple Watch on **watchOS 26.6 or later**, and its paired iPhone. A free
 Apple ID is enough.
 
 ```bash
@@ -41,6 +41,21 @@ Choose any Apple Watch simulator as the destination and Run. The crown is your m
 scroll. **The simulator has no Taptic Engine**, so you'll see the ring flash but feel nothing. Check the feel on a
 real watch.
 
+## Screenshots
+
+`docs/img/` comes from the watch simulator on a GitHub macOS runner, not from a real watch:
+
+- **Actions → screenshots → Run workflow** builds a Debug app, boots a 46 mm watch (`SHOTS_ONLY=medium`; unset it
+  for 40 and 49 mm too), launches Tactus stopped and playing, takes 8 frames of each and force-pushes them to the
+  `screenshots` branch. About 8 minutes.
+- Playing needs a tap, which a simulator can't get from the command line, so Debug builds start on their own when
+  launched with `-tactus.autostart YES`. Tempo and feel come from `-tempo.bpm 120` and `-tempo.feel strong`.
+- Pick frames by hand: about one in three catches the ring lit on a beat.
+
+Known rough edges: the third state (Strong at 168) comes up with default settings instead, autostart didn't fire
+on the paired-iPhone run, and the red "no iPhone" icon stays even when an iPhone simulator is paired. The
+images in `docs/img/` are from the run where stopped and playing both worked.
+
 ## When it goes wrong
 
 | What you see | What it means | Fix |
@@ -48,7 +63,8 @@ real watch.
 | *Signing for "Tactus" requires a development team* | No Team picked | Step 1 above |
 | *Failed to register bundle identifier* / *not available* | Someone else's app already has `com.fortakenjay.tactus` | Step 2: change the bundle identifier |
 | *Your development team has reached the maximum number of registered devices* | A free team allows 3 devices per platform, for 7 days | Wait for one to expire, or use a paid account |
-| The destination menu doesn't list the watch | Not paired, locked, or Developer Mode off | Unlock the watch, keep it on the charger near the iPhone, check step 3 |
+| The destination menu doesn't list the watch | Not paired, locked, or Developer Mode off | Unlock the watch, keep it on the charger near the iPhone, check step 3. In Xcode 27 there is no *Devices and Simulators* window; use *Manage Devices…* in the destination menu (Device Hub) |
+| *A connection to this device could not be established* … *Timed out while attempting to establish tunnel* (CoreDeviceError 4000, RemotePairingError 1001) | Xcode reaches a watch over Wi-Fi, not a cable, and couldn't open that connection | Watch and Mac on the same Wi-Fi; VPN off on the Mac; turn the iPhone's Bluetooth off for a minute so the watch uses Wi-Fi. School networks (eduroam) usually block devices from reaching each other: use a home network |
 | The app opened before but now won't | The 7-day signing ran out | Run again from Xcode |
 | *Untrusted Developer* on first launch | iOS hasn't trusted your Apple ID yet | On the iPhone: Settings → General → VPN & Device Management → your Apple ID → Trust |
 | Beats stop when you lower your wrist | The background session didn't start or was ended | Check `Support/Info.plist` still has `WKBackgroundModes` → `mindfulness`. Pressing the crown or opening another app also ends it, by design |
