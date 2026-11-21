@@ -125,7 +125,7 @@ The same screen on a 40 mm, 46 mm and 49 mm watch:
 - [Interface](docs/wiki/Interface.md): the interaction and accessibility rules the screen follows, and where each lives
 - [Decisions](docs/wiki/Decisions.md): what was chosen over what, and why, by component
 - [Running it](docs/wiki/Running.md): setup and troubleshooting
-- [Knowledge graph](docs/wiki/Knowledge-graph.md): a map of the code (174 nodes), built with graphify
+- [Knowledge graph](docs/wiki/Knowledge-graph.md): a map of the code (179 nodes), built with graphify
 - [Architecture](docs/ARCHITECTURE.md): states, data flow, invariants
 
 ## What it doesn't do yet

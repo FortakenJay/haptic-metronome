@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import os
 import WatchKit
 
 /// The metronome: tempo, play state, and the loop that taps the wrist on every beat.
@@ -22,6 +23,10 @@ final class Metronome {
     @ObservationIgnored private var origin = ContinuousClock.now
     @ObservationIgnored private var loop: Task<Void, Never>?
     @ObservationIgnored private let session = RuntimeSession()
+    /// How many times one run may start a fresh session after watchOS ends one early. Reset by `start()`.
+    @ObservationIgnored private var sessionRestartsLeft = 0
+    private static let maxSessionRestarts = 3
+    @ObservationIgnored private let log = Logger(subsystem: "com.fortakenjay.tactus", category: "metronome")
     @ObservationIgnored private let defaults: UserDefaults
 
     private enum Key {
@@ -49,12 +54,15 @@ final class Metronome {
         isPlaying = true
         origin = .now
         clock = BeatClock(startingAt: 0, bpm: bpm)   // first beat right away
+        sessionRestartsLeft = Self.maxSessionRestarts
+        log.info("start at \(self.bpm) BPM, feel \(self.feel.rawValue, privacy: .public)")
         session.begin()
         runLoop()
     }
 
     func stop(notice: String? = nil) {
         guard isPlaying else { return }
+        log.info("stop: \(notice ?? "tapped", privacy: .public)")
         isPlaying = false
         self.notice = notice
         loop?.cancel()
@@ -110,17 +118,37 @@ final class Metronome {
         clock.beatPlayed(at: (ContinuousClock.now - origin).inSeconds)
     }
 
-    // MARK: - Background session
+    // MARK: - Background session and app state
+
+    /// The app is on screen and active again (wrist raised, or back in the app). If the beats are meant to be
+    /// playing but the session is gone, start a fresh one: watchOS only allows that while the app is active.
+    func appBecameActive() {
+        guard isPlaying, !session.isActive else { return }
+        log.notice("active while playing without a session: starting a new one")
+        session.begin()
+    }
+
+    /// The app left the screen. Without a session nothing keeps the beat loop alive, so stop and say so.
+    func appMovedToBackground() {
+        guard isPlaying, !session.isActive else { return }
+        stop(notice: "Stopped when you left")
+    }
 
     private func sessionEnded(_ end: RuntimeSession.End) {
         switch end {
         case .expired:
             stop(notice: "Stopped after an hour")
         case .interrupted:
-            // With the app still on screen the beats keep going; only the wrist-down part is lost.
-            // If the app has left the screen, nothing can keep the loop alive, so say so and stop.
-            if WKApplication.shared().applicationState != .active {
-                stop(notice: "Stopped when you left")
+            // A session that ends early doesn't come back by itself, and without one the next wrist-down
+            // silences the haptics (watchOS refuses them once the app isn't active). So while the app is still
+            // active, start a fresh one right away. A few tries per run, so a session that keeps failing
+            // can't loop; after that, stop honestly instead of showing "playing" with no taps.
+            if WKApplication.shared().applicationState == .active && sessionRestartsLeft > 0 {
+                sessionRestartsLeft -= 1
+                log.notice("session ended early; starting a new one (\(self.sessionRestartsLeft) tries left)")
+                session.begin()
+            } else {
+                stop(notice: "watchOS ended the session")
             }
         }
     }

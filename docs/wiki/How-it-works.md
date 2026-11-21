@@ -94,8 +94,18 @@ How each end is handled:
 |---|---|
 | You tapped stop | `end()` forgets the session first and then invalidates it, so its own "invalidated" callback is ignored |
 | One-hour limit (`expired`) | Stops, and shows *Stopped after an hour* above *Tap to start* |
-| Ended early, app still on screen | Keeps playing. Only the wrist-down part is lost |
-| Ended early, app no longer on screen | Stops, and shows *Stopped when you left* |
+| Ended early, app still active | Starts a fresh session right away, up to 3 times per run. Past that, stops with *watchOS ended the session* |
+| Ended early, app not active (wrist down, or left) | Stops, and shows *watchOS ended the session* |
+| App comes back to the screen while playing with no session | Starts a fresh one (only allowed while active) |
+| App leaves the screen while playing with no session | Stops, and shows *Stopped when you left* |
+
+Without a session, keeping the beat loop going is not enough. Once the app isn't active, watchOS refuses the
+haptics (`NSOSStatusErrorDomain Code=-536870187` in the console, once per beat), so the taps stop and the screen sits
+still. That is the freeze seen on Jih's watch in the first build, which kept "playing" after a session ended. Now
+the app either gets a new session or stops and says why.
+
+The metronome is owned by `TactusApp`, not by the screen, so a SwiftUI view rebuild can't release a running
+session either (watchOS logs that as *WKExtendedRuntimeObject was dealloced while running*).
 
 Callbacks arrive off the main actor. Each one passes only the session's identity
 (`ObjectIdentifier`) to the main actor, and a callback for a session that isn't the current one is ignored.

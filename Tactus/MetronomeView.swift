@@ -8,9 +8,11 @@ import SwiftUI
 /// - Play state is never carried by motion or colour alone: the icon and the words change too.
 /// - With Reduce Motion on, the beat flash and the press only fade; nothing scales.
 struct MetronomeView: View {
-    @State private var metronome = Metronome()
+    /// Owned by `TactusApp`, not by this view, so rebuilding the view can never release a running session.
+    let metronome: Metronome
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationStack {
@@ -51,6 +53,13 @@ struct MetronomeView: View {
                     .accessibilityLabel("Beat feel")
                     .accessibilityValue(metronome.feel.name)
                 }
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .active: metronome.appBecameActive()
+            case .background: metronome.appMovedToBackground()
+            default: break   // .inactive: wrist down or Always On; the session keeps the app running
             }
         }
         #if DEBUG
@@ -180,5 +189,5 @@ private struct PressStyle: ButtonStyle {
 }
 
 #Preview {
-    MetronomeView()
+    MetronomeView(metronome: Metronome())
 }

@@ -29,7 +29,9 @@ What was chosen, what it was chosen over, and why.
 |---|---|---|---|
 | Keep-alive | `WKExtendedRuntimeSession`, mindfulness | `HKWorkoutSession` | A workout session has no hour cap, but watchOS runs one workout at a time, so starting it would end a real workout in another app. It also needs HealthKit and counts toward your rings |
 | Session type | Mindfulness (frontmost, 1 hour) | Physical therapy (background, 1 hour) | The metronome only matters while you're in it. Frontmost ends when you leave, which is the honest behaviour |
-| Session ends early while on screen | Keep playing | Stop | Only the wrist-down part is lost. Stopping would punish you for something you can't see |
+| Session ends early while active | Start a fresh session (up to 3 times per run) | Keep playing without one | Tried first: it froze on Jih's watch. Without a session, the next wrist-down makes watchOS refuse the haptics, so taps and screen both stop while the app still says *playing* |
+| Who owns the metronome | `TactusApp`, app-scoped `@State` | The screen's `@State` | A view rebuild released a running session ("dealloced while running" in the log). The session must live as long as the app |
+| Diagnostics | `os.Logger`, subsystem `com.fortakenjay.tactus` | `print` | Shows in Console.app without Xcode attached, with the session's end reason |
 | Session ends after you left | Stop and say why | Pretend it's still playing | The loop can't run while suspended, so a "playing" screen would be lying |
 
 ## Haptics

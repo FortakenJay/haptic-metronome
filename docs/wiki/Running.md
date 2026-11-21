@@ -68,6 +68,7 @@ images in `docs/img/` are from the run where stopped and playing both worked.
 | The app opened before but now won't | The 7-day signing ran out | Run again from Xcode |
 | *Untrusted Developer* on first launch | iOS hasn't trusted your Apple ID yet | On the iPhone: Settings → General → VPN & Device Management → your Apple ID → Trust |
 | Beats stop when you lower your wrist | The background session didn't start or was ended | Check `Support/Info.plist` still has `WKBackgroundModes` → `mindfulness`. Pressing the crown or opening another app also ends it, by design |
+| Taps and screen stop together; console shows `Code=-536870187` once per beat | The background session ended and watchOS refused the haptics | Pull and Run again. To see why a session ended: Console.app → your watch → search `com.fortakenjay.tactus`; the `invalidated: reason N` line gives the reason (3 = left the app, 4 = suppressed by the system) |
 | *Stopped after an hour* | The mindfulness session's 1-hour limit | Tap to start again |
 | Beats blur together at fast tempos | The haptic takes about as long as the gap between beats | Switch to **Light** (hand button, top right) |
 | `swift test` can't find XCTest | Command Line Tools without Xcode | `sudo xcode-select -s /Applications/Xcode.app` |

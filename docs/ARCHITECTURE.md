@@ -27,7 +27,9 @@ directly (same module), and `Package.swift` compiles the same files as `TactusCo
 
 ## State
 
-`Metronome` is the only state holder. The view reads it and calls its five methods.
+`Metronome` is the only state holder. `TactusApp` owns it (`@State` at app scope) and hands it to the view, so a
+view rebuild can never release it or its running session. The view reads it and calls its methods, plus
+`appBecameActive()` / `appMovedToBackground()` from `scenePhase`.
 
 | Property | Type | Saved | Read by |
 |---|---|---|---|
@@ -49,8 +51,10 @@ Not observed (`@ObservationIgnored`): `clock`, `origin`, `loop`, `session`, `def
 | Stopped | crown / VoiceOver adjust | Stopped | save `bpm` |
 | any | feel button | same | save `feel`; play a sample if Stopped |
 | Playing | session `expired` | Stopped | `notice = "Stopped after an hour"` |
-| Playing | session `interrupted`, app not active | Stopped | `notice = "Stopped when you left"` |
-| Playing | session `interrupted`, app active | Playing | none (keeps playing on screen) |
+| Playing | session `interrupted`, app active, tries left | Playing | `session.begin()` again (3 tries per run) |
+| Playing | session `interrupted`, app not active or no tries left | Stopped | `notice = "watchOS ended the session"` |
+| Playing, no session | scene `.active` | Playing | `session.begin()` |
+| Playing, no session | scene `.background` | Stopped | `notice = "Stopped when you left"` |
 
 `start()` and `stop()` both check the current state first, so calling one twice does nothing.
 
@@ -60,9 +64,11 @@ Not observed (`@ObservationIgnored`): `clock`, `origin`, `loop`, `session`, `def
 2. **No bursts.** After every played beat, `nextBeat > now`, however late that beat was. (`BeatClock.beatPlayed`)
 3. **No tempo jump.** After `setTempo`, `nextBeat − lastBeat == newInterval`. (`BeatClock.setTempo`)
 4. **At most one loop.** `runLoop()` cancels the previous `Task` before starting another.
-5. **At most one session**, and a session ended by the user never calls back into `Metronome`
+5. **Playing means a session or an active app.** If the session is gone, either a new one starts (app active) or
+   the metronome stops with a notice. Never "playing" with nobody keeping the app alive.
+6. **At most one session**, and a session ended by the user never calls back into `Metronome`
    (`RuntimeSession.end` clears `session` before `invalidate()`; `finish` checks identity).
-6. **The ring flash (0.21 s) is shorter than the shortest beat (0.25 s at 240 BPM).**
+7. **The ring flash (0.21 s) is shorter than the shortest beat (0.25 s at 240 BPM).**
 
 ## Concurrency
 

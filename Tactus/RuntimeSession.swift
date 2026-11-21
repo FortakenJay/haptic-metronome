@@ -1,4 +1,8 @@
+import os
 import WatchKit
+
+/// Tactus's own lines in the Xcode console and Console.app (subsystem `com.fortakenjay.tactus`).
+private let sessionLog = Logger(subsystem: "com.fortakenjay.tactus", category: "session")
 
 /// Keeps Tactus running, and buzzing, after the wrist drops and the screen goes dark.
 ///
@@ -19,6 +23,9 @@ final class RuntimeSession: NSObject {
 
     private var session: WKExtendedRuntimeSession?
 
+    /// True from `begin()` until the session ends or `end()` is called.
+    var isActive: Bool { session != nil }
+
     /// Starts a session. Must be called while the app is active, which it is: the user just tapped.
     func begin() {
         guard session == nil else { return }
@@ -26,6 +33,7 @@ final class RuntimeSession: NSObject {
         newSession.delegate = self
         newSession.start()
         session = newSession
+        sessionLog.info("begin: start requested")
     }
 
     /// Ends the session because the user stopped the metronome.
@@ -36,6 +44,8 @@ final class RuntimeSession: NSObject {
     func end() {
         guard let current = session else { return }
         session = nil   // forget it first, so its own invalidation callback is ignored
+        let state = current.state.rawValue
+        sessionLog.info("end: state \(state)")
         if current.state != .invalid {
             current.invalidate()
         }
@@ -49,9 +59,12 @@ final class RuntimeSession: NSObject {
 }
 
 extension RuntimeSession: WKExtendedRuntimeSessionDelegate {
-    nonisolated func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {}
+    nonisolated func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        sessionLog.info("did start")
+    }
 
     nonisolated func extendedRuntimeSessionWillExpire(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        sessionLog.notice("will expire")
         let id = ObjectIdentifier(extendedRuntimeSession)
         Task { @MainActor in self.finish(id, .expired) }
     }
@@ -61,6 +74,8 @@ extension RuntimeSession: WKExtendedRuntimeSessionDelegate {
         didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason,
         error: Error?
     ) {
+        // Reasons: 0 none, 1 another session in progress, 2 expired, 3 left the app, 4 suppressed by system, -1 error.
+        sessionLog.notice("invalidated: reason \(reason.rawValue), error \(error?.localizedDescription ?? "none", privacy: .public)")
         let id = ObjectIdentifier(extendedRuntimeSession)
         let end: End = reason == .expired ? .expired : .interrupted
         Task { @MainActor in self.finish(id, end) }
