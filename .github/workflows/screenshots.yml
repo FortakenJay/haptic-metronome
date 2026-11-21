@@ -24,6 +24,8 @@ jobs:
           fi
           xcrun simctl list runtimes
 
+      # The project's minimum watchOS can be newer than the runner's newest simulator (26.6 vs 26.2),
+      # so this build only lowers it to 10.0, the minimum the code needs. The project file is untouched.
       - name: Build for the watchOS simulator
         run: |
           set -o pipefail
@@ -33,6 +35,7 @@ jobs:
             -configuration Debug \
             -destination 'generic/platform=watchOS Simulator' \
             -derivedDataPath build \
+            WATCHOS_DEPLOYMENT_TARGET=10.0 \
             | tail -20
 
       - name: Take screenshots
