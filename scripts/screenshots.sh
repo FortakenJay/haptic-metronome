@@ -67,6 +67,8 @@ shoot() {
 
 while IFS='|' read -r slug name type; do
   [[ -z "$slug" ]] && continue
+  # SHOTS_ONLY=medium shoots one size only (pairing an iPhone per watch is slow).
+  if [[ -n "${SHOTS_ONLY:-}" && "$slug" != "$SHOTS_ONLY" ]]; then continue; fi
   echo "== $slug: $name"
   if ! udid=$(xcrun simctl create "tactus-$slug" "$type" "$RUNTIME" 2>/dev/null); then
     echo "   cannot create $name on $RUNTIME, skipped"
