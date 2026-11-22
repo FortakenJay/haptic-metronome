@@ -5,7 +5,8 @@ import WatchKit
 
 /// The metronome: tempo, play state, and the loop that taps the wrist on every beat.
 ///
-/// The screen only reads this object and calls `toggle()`, `setTempo(_:)`, `step(by:)` and `cycleFeel()`.
+/// The screen only reads this object and calls `toggle()`, `setTempo(_:)`, `step(by:)`, `cycleFeel()` and
+/// `setMeter(_:)`.
 /// The timing itself is `BeatClock` (pure, tested); this class just sleeps until each planned beat and
 /// plays the haptic.
 @MainActor
@@ -13,13 +14,19 @@ import WatchKit
 final class Metronome {
     private(set) var bpm: Int
     private(set) var feel: Feel
+    /// Time signature and grouping. `.off` means every beat is the same.
+    private(set) var meter: Meter
     private(set) var isPlaying = false
+    /// Position of the last beat that played within its bar (0 = beat 1). Drives the beat dots.
+    private(set) var beatInBar = 0
     /// Goes up by one on every beat. The screen watches it to flash the ring.
     private(set) var beatCount = 0
     /// Why the metronome stopped on its own, shown until the next start.
     private(set) var notice: String?
 
     @ObservationIgnored private var clock = BeatClock(startingAt: 0, bpm: Tempo.defaultBPM)
+    /// Beats played since start, or since the meter last changed, so the next beat after a change is beat 1.
+    @ObservationIgnored private var beatIndex = 0
     @ObservationIgnored private var origin = ContinuousClock.now
     @ObservationIgnored private var loop: Task<Void, Never>?
     @ObservationIgnored private let session = RuntimeSession()
@@ -32,6 +39,7 @@ final class Metronome {
     private enum Key {
         static let bpm = "tempo.bpm"
         static let feel = "tempo.feel"
+        static let meter = "tempo.meter"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -39,6 +47,7 @@ final class Metronome {
         let saved = defaults.integer(forKey: Key.bpm)   // 0 when never saved
         bpm = saved == 0 ? Tempo.defaultBPM : Tempo.clamped(Double(saved))
         feel = defaults.string(forKey: Key.feel).flatMap(Feel.init(rawValue:)) ?? .light
+        meter = defaults.string(forKey: Key.meter).flatMap(Meter.with(id:)) ?? .off
         session.onEnd = { [weak self] end in self?.sessionEnded(end) }
     }
 
@@ -54,8 +63,9 @@ final class Metronome {
         isPlaying = true
         origin = .now
         clock = BeatClock(startingAt: 0, bpm: bpm)   // first beat right away
+        beatIndex = 0
         sessionRestartsLeft = Self.maxSessionRestarts
-        log.info("start at \(self.bpm) BPM, feel \(self.feel.rawValue, privacy: .public)")
+        log.info("start at \(self.bpm) BPM, meter \(self.meter.id, privacy: .public), feel \(self.feel.rawValue, privacy: .public)")
         session.begin()
         runLoop()
     }
@@ -90,8 +100,17 @@ final class Metronome {
         feel = feel.next
         defaults.set(feel.rawValue, forKey: Key.feel)
         if !isPlaying {
-            WKInterfaceDevice.current().play(feel.haptic)   // a sample, so you know what you picked
+            WKInterfaceDevice.current().play(feel.tap.haptic)   // a sample, so you know what you picked
         }
+    }
+
+    /// Changes the time signature. While playing, the very next beat becomes beat 1 of a new bar.
+    func setMeter(_ newMeter: Meter) {
+        guard newMeter != meter else { return }
+        meter = newMeter
+        defaults.set(newMeter.id, forKey: Key.meter)
+        beatIndex = 0
+        beatInBar = 0
     }
 
     // MARK: - Beat loop
@@ -113,7 +132,9 @@ final class Metronome {
     }
 
     private func playBeat() {
-        WKInterfaceDevice.current().play(feel.haptic)
+        WKInterfaceDevice.current().play(meter.tap(atBeat: beatIndex, feel: feel).haptic)
+        beatInBar = meter.position(ofBeat: beatIndex)
+        beatIndex += 1
         beatCount &+= 1
         clock.beatPlayed(at: (ContinuousClock.now - origin).inSeconds)
     }

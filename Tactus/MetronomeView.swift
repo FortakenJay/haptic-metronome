@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The one screen. Turn the crown to change tempo, tap anywhere to start or stop.
+/// The one screen. Turn the crown to change tempo, tap anywhere to start or stop. The time signature button at
+/// the top left picks a meter; the beat dots under the dial show where you are in the bar.
 ///
 /// Interaction rules it follows:
 /// - Turning the crown is high-frequency, so the number changes instantly, with no animation.
@@ -13,12 +14,16 @@ struct MetronomeView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
     @Environment(\.scenePhase) private var scenePhase
+    @State private var choosingMeter = false
 
     var body: some View {
         NavigationStack {
             Button(action: metronome.toggle) {
                 VStack(spacing: 6) {
                     dial
+                    if !metronome.meter.isOff && !isLuminanceReduced {
+                        BeatDots(meter: metronome.meter, current: metronome.beatInBar, isPlaying: metronome.isPlaying)
+                    }
                     status
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -46,12 +51,33 @@ struct MetronomeView: View {
                 }
             }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { choosingMeter = true } label: {
+                        if metronome.meter.isOff {
+                            Image(systemName: "music.note")
+                        } else {
+                            Text(metronome.meter.label)
+                                .font(.footnote.weight(.semibold))
+                                .monospacedDigit()
+                        }
+                    }
+                    .accessibilityLabel("Time signature")
+                    .accessibilityValue(metronome.meter.spokenLabel)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
+                    // Feel only matters with no meter: with one, group starts are Strong and the rest Light.
                     Button(action: metronome.cycleFeel) {
                         Image(systemName: metronome.feel == .strong ? "hand.tap.fill" : "hand.tap")
                     }
+                    .disabled(!metronome.meter.isOff)
                     .accessibilityLabel("Beat feel")
-                    .accessibilityValue(metronome.feel.name)
+                    .accessibilityValue(metronome.meter.isOff ? metronome.feel.name : "Set by the time signature")
+                }
+            }
+            .sheet(isPresented: $choosingMeter) {
+                MeterPicker(selection: metronome.meter) { meter in
+                    metronome.setMeter(meter)
+                    choosingMeter = false
                 }
             }
         }
@@ -111,10 +137,10 @@ struct MetronomeView: View {
                     .monospacedDigit()   // digits keep one width, so turning the crown never jiggles the number
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
-                Text("BPM")
+                Text(metronome.meter.countsEighths ? "BPM ♪" : "BPM")
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
-                Text(Tempo.marking(for: metronome.bpm))
+                Text(subtitle)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -161,8 +187,22 @@ struct MetronomeView: View {
         )
     }
 
+    /// Under the number: the Italian marking for quarter-note meters, the grouping for odd ones ("Andante · 3+2"),
+    /// and only the grouping for /8 meters, where an Italian name for an eighth-note count would mislead.
+    private var subtitle: String {
+        let meter = metronome.meter
+        var parts: [String] = []
+        if !meter.countsEighths { parts.append(Tempo.marking(for: metronome.bpm)) }
+        if let grouping = meter.groupingLabel { parts.append(grouping) }
+        return parts.joined(separator: " · ")
+    }
+
     private var accessibilityValue: String {
-        var parts = ["\(metronome.bpm) beats per minute", Tempo.marking(for: metronome.bpm)]
+        let meter = metronome.meter
+        let unit = meter.countsEighths ? "eighth notes per minute" : "beats per minute"
+        var parts = ["\(metronome.bpm) \(unit)"]
+        if !meter.countsEighths { parts.append(Tempo.marking(for: metronome.bpm)) }
+        if !meter.isOff { parts.append(meter.spokenLabel) }
         if let notice = metronome.notice, !metronome.isPlaying {
             parts.append(notice)
         }
