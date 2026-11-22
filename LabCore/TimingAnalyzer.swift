@@ -108,12 +108,13 @@ public struct TakeSummary: Sendable, Equatable {
 
         var perStretch: [Int: [Double]] = [:]
         for note in notes { perStretch[note.beat / (2 * beatsPerBar), default: []].append(note.deviation) }
-        // Earliest stretch wins a tie, so the report doesn't depend on dictionary order.
-        let worst = perStretch
-            .filter { $0.value.count >= 4 }
-            .sorted { $0.key < $1.key }
-            .compactMap { entry in Stats.median(entry.value).map { (entry.key, $0) } }
-            .max { abs($0.1) < abs($1.1) }
+        // Earliest stretch wins unless a later one is at least 1 ms further off: ties (and float noise) never
+        // depend on dictionary order.
+        var worst: (Int, Double)?
+        for (key, values) in perStretch.sorted(by: { $0.key < $1.key }) where values.count >= 4 {
+            guard let value = Stats.median(values) else { continue }
+            if worst == nil || abs(value) > abs(worst!.1) + 0.001 { worst = (key, value) }
+        }
         if let worst, abs(worst.1) >= Self.stretchThreshold {
             worstStretch = Stretch(firstBar: worst.0 * 2 + 1, lastBar: worst.0 * 2 + 2, median: worst.1)
         } else {

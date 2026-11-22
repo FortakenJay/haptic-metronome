@@ -9,6 +9,8 @@
 /* Begin PBXFileReference section */
 		7A0000000000000000000004 /* Tactus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tactus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A0000000000000000000011 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7A000000000000000000001D /* TactusLab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TactusLab.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A000000000000000000001E /* Lab-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Lab-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -27,10 +29,27 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+		7A0000000000000000000014 /* LabCore */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = LabCore;
+			sourceTree = "<group>";
+		};
+		7A0000000000000000000015 /* Lab */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Lab;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		7A0000000000000000000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7A0000000000000000000018 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,6 +65,8 @@
 				7A0000000000000000000005 /* Tactus */,
 				7A0000000000000000000012 /* Core */,
 				7A0000000000000000000013 /* Shared */,
+				7A0000000000000000000015 /* Lab */,
+				7A0000000000000000000014 /* LabCore */,
 				7A0000000000000000000010 /* Support */,
 				7A0000000000000000000003 /* Products */,
 			);
@@ -55,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				7A0000000000000000000004 /* Tactus.app */,
+				7A000000000000000000001D /* TactusLab.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -63,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				7A0000000000000000000011 /* Info.plist */,
+				7A000000000000000000001E /* Lab-Info.plist */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -94,6 +117,31 @@
 			productReference = 7A0000000000000000000004 /* Tactus.app */;
 			productType = "com.apple.product-type.application";
 		};
+		7A0000000000000000000016 /* TactusLab */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7A000000000000000000001A /* Build configuration list for PBXNativeTarget "TactusLab" */;
+			buildPhases = (
+				7A0000000000000000000017 /* Sources */,
+				7A0000000000000000000018 /* Frameworks */,
+				7A0000000000000000000019 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				7A0000000000000000000015 /* Lab */,
+				7A0000000000000000000014 /* LabCore */,
+				7A0000000000000000000012 /* Core */,
+				7A0000000000000000000013 /* Shared */,
+			);
+			name = TactusLab;
+			packageProductDependencies = (
+			);
+			productName = TactusLab;
+			productReference = 7A000000000000000000001D /* TactusLab.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -105,6 +153,9 @@
 				LastUpgradeCheck = 2720;
 				TargetAttributes = {
 					7A0000000000000000000006 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					7A0000000000000000000016 = {
 						CreatedOnToolsVersion = 16.0;
 					};
 				};
@@ -124,6 +175,7 @@
 			projectRoot = "";
 			targets = (
 				7A0000000000000000000006 /* Tactus */,
+				7A0000000000000000000016 /* TactusLab */,
 			);
 		};
 /* End PBXProject section */
@@ -136,10 +188,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7A0000000000000000000019 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		7A0000000000000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7A0000000000000000000017 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -330,6 +396,64 @@
 			};
 			name = Release;
 		};
+		7A000000000000000000001B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3U5U33TD6W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Support/Lab-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Tactus Lab";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fortakenjay.tactus.lab;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.6;
+			};
+			name = Debug;
+		};
+		7A000000000000000000001C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3U5U33TD6W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Support/Lab-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Tactus Lab";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKWatchOnly = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fortakenjay.tactus.lab;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.6;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -347,6 +471,15 @@
 			buildConfigurations = (
 				7A000000000000000000000E /* Debug */,
 				7A000000000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7A000000000000000000001A /* Build configuration list for PBXNativeTarget "TactusLab" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7A000000000000000000001B /* Debug */,
+				7A000000000000000000001C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

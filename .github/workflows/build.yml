@@ -25,16 +25,19 @@ jobs:
         run: |
           xcodebuild -version
           xcodebuild -showsdks | grep -i watch || true
-      - name: Build for watchOS (no signing)
+      - name: Build both apps for watchOS (no signing)
         run: |
           set -o pipefail
-          xcodebuild build \
-            -project Tactus.xcodeproj \
-            -scheme Tactus \
-            -configuration Debug \
-            -destination 'generic/platform=watchOS' \
-            CODE_SIGNING_ALLOWED=NO \
-            | tee build.log
+          for scheme in Tactus TactusLab; do
+            echo "== $scheme"
+            xcodebuild build \
+              -project Tactus.xcodeproj \
+              -scheme "$scheme" \
+              -configuration Debug \
+              -destination 'generic/platform=watchOS' \
+              CODE_SIGNING_ALLOWED=NO \
+              | tee -a build.log
+          done
       - name: Warnings in our own code
         if: always()
-        run: grep -E "Tactus/.*(warning|error):" build.log | sort -u || echo "none"
+        run: grep -E "/(Tactus|Lab|LabCore|Core|Shared)/.*(warning|error):" build.log | sort -u || echo "none"
