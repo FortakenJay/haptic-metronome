@@ -68,8 +68,8 @@ public struct Meter: Hashable, Sendable, Identifiable {
 
     /// What VoiceOver says: "5/8, 3 plus 2".
     public var spokenLabel: String {
-        guard let grouping = groupingLabel else { return label }
-        return "\(label), \(grouping.replacingOccurrences(of: "+", with: " plus "))"
+        guard groups.count > 1 else { return label }
+        return "\(label), \(groups.map(String.init).joined(separator: " plus "))"
     }
 
     /// True for /8 meters, where the tempo counts eighth notes.
