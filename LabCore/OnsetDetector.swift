@@ -28,6 +28,8 @@ public struct OnsetParameters: Sendable, Equatable {
     public var delta: Float = 0.4
     /// Seconds between two onsets: a rolled chord counts once.
     public var minGap: Double = 0.030
+    /// Frames to listen before reporting anything, so the threshold has some history (about 100 ms).
+    public var warmUp = 20
 
     public init(sampleRate: Double) {
         self.sampleRate = sampleRate
@@ -186,7 +188,7 @@ public final class OnsetDetector {
         let p = parameters
         let c = history.count - 1 - p.postMax
         let absolute = frameCount - 1 - p.postMax
-        guard c >= 1, absolute >= p.preMax, c - p.preMax >= 0 else { return nil }
+        guard c >= 1, absolute >= max(p.preMax, p.warmUp), c - p.preMax >= 0 else { return nil }
 
         let value = history[c]
         for i in (c - p.preMax)...(c + p.postMax) where history[i] > value { return nil }

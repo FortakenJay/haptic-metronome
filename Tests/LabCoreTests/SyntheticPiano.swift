@@ -89,7 +89,8 @@ enum SyntheticPiano {
     private static func addNote(_ y: inout [Float], at t: Double, midi: Int, velocity: Float, sr: Double, rng: inout SplitMix) {
         let f0 = 440 * pow(2, Double(midi - 69) / 12)
         let start = Int((t * sr).rounded())
-        let length = Int(0.7 * sr)
+        let length = Int(1.2 * sr)
+        let release = Int(0.15 * sr)   // fade out: a hard cut would be a click the detector rightly hears
         let limit = min(sr / 2 - 300, 6_000)
         var partials: [(w: Double, amp: Float, decay: Double, phase: Double)] = []
         var k = 1
@@ -108,6 +109,7 @@ enum SyntheticPiano {
             }
             if i < attack { v *= Float(0.5 - 0.5 * cos(.pi * Double(i) / Double(attack))) }
             if i < hammer { v += 0.15 * velocity * Float(rng.normal() * exp(-Double(i) / (0.0015 * sr))) }
+            if i >= length - release { v *= Float(0.5 + 0.5 * cos(.pi * Double(i - (length - release)) / Double(release))) }
             y[start + i] += v
         }
     }
