@@ -39,6 +39,18 @@ other repos (web rules, adapted to watchOS). The table shows the rule, how it ap
 | One accent colour, one meaning | Amber (`#FFB020`, `AccentColor`) means *playing*. Nothing else uses it | `Assets.xcassets/AccentColor` |
 | Outline for default, fill for active | Light feel is `hand.tap`, Strong is `hand.tap.fill` | toolbar button |
 
+## Meters on the screen
+
+| Rule | Here | Where |
+|---|---|---|
+| A control says what it holds | The top-left button shows the meter itself ("7/8"), or a note symbol when Off | `MetronomeView` toolbar |
+| Disabled controls say why | With a meter set, the Feel button is disabled and VoiceOver reads "Set by the time signature" | `MetronomeView` toolbar |
+| Grouping shown, not just stated | Beat dots are spaced by group (●○ ○○ ○○○ for 2+2+3); beat 1 is largest, group starts are brighter | `BeatDots` |
+| Motion is never the only cue | The lit dot moves with the beat, and the grouping is also written under the tempo ("3+2+2") | `MetronomeView.subtitle` |
+| Decorative stays out of VoiceOver | The dots are hidden from VoiceOver; the dial's value already says "7/8, 2 plus 2 plus 3" | `BeatDots`, `accessibilityValue` |
+| Selected state is announced | The picker marks the current meter with a checkmark *and* the selected trait | `MeterPicker` |
+| Always On stays quiet | The dots are hidden when the screen dims, like the beat ring | `MetronomeView` |
+
 ## Small things that are deliberate
 
 - **Crown clicks go quiet while playing.** `isHapticFeedbackEnabled: !metronome.isPlaying`. Otherwise you'd feel

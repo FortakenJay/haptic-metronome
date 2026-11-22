@@ -15,7 +15,7 @@ flowchart LR
     V -.-> T
 ```
 
-`Tempo`, `BeatClock` and `Feel` (dashed side) are plain Swift in `Tactus/Core/` and are tested on a Mac with
+`Tempo`, `BeatClock`, `Meter` and `Feel` (dashed side) are plain Swift in `Core/` and are tested on a Mac with
 `swift test`. The rest needs WatchKit.
 
 ## Starting
@@ -36,7 +36,7 @@ One `Task` on the main actor, repeating:
 ```swift
 let due = origin + .seconds(clock.nextBeat)
 try await Task.sleep(until: due, tolerance: .zero, clock: .continuous)
-playBeat()   // haptic, beatCount += 1, clock.beatPlayed(at: now)
+playBeat()   // tap from meter.tap(atBeat:feel:), beatInBar, beatCount += 1, clock.beatPlayed(at: now)
 ```
 
 - It sleeps until an **absolute** time on `ContinuousClock`. It never sleeps for a relative "half a second", so

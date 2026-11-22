@@ -53,6 +53,34 @@ What was chosen, what it was chosen over, and why.
 | Feel control | One toolbar button, outline/fill | A settings screen | Two options don't need a screen |
 | Crown detent clicks | Off while playing | Always on | The only taps on the wrist while playing should be beats |
 
+## Meters
+
+| Decision | Chosen | Instead of | Why |
+|---|---|---|---|
+| Which beats are accented | The first beat of every group | Only beat 1 | Odd meters are felt by their groups: 7/8 as 2+2+3 is three pulses, not seven |
+| Number of strengths | Two (Strong `.start`, Light `.click`), beat 1 shown by the dots | A third strength | watchOS has no third tap that is reliably distinct; two quick taps in a row risk the Taptic Engine refusing the second |
+| /8 tempo | Counts eighth notes | Counts the group pulse | Eighths are what a score's marking usually gives for 5/8 and 7/8, and every eighth taps (Jih's choice) |
+| Italian marking in /8 | Hidden; the grouping shows instead | Marking of the eighth count | "Prestissimo" for 240 eighths a minute would mislead |
+| Feel with a meter | Disabled, says why | Feel sets the light beats | Strong light beats would erase the grouping |
+| Meter change while playing | Next beat is beat 1 | Keep the bar position | A new meter mid-bar has no sensible "position" |
+| Meter list | 16 curated entries with groupings | A free-form editor | Covers what piano repertoire uses; a watch is a poor place to type 2+2+2+3 |
+
+## Tactus Lab
+
+| Decision | Chosen | Instead of | Why |
+|---|---|---|---|
+| Where it lives | A second app in the same repo, sharing `Core/` and `Shared/` | Inside Tactus, or a separate repo | Jih wants the practice metronome untouched by experiments; sharing the tested core avoids a copy |
+| Its engine | Its own `LabSession` | Reusing `Metronome` | Lab needs beat times on the audio clock and different phases; changes for Lab must not reach the metronome |
+| Onset detection | Spectral flux above 1 kHz | Amplitude envelope; a trained model | Flux is the standard for percussive onsets; the band ignores the Taptic buzz; no model to ship or train |
+| Tuning | Python prototype on synthetic takes first, then a Swift port with the same tests | Tuning on the watch | Known ground truth, seconds per experiment instead of a build and install |
+| Timing precision | Frame centre + parabolic interpolation | Time-domain attack search | Tried first: it was 9 ms late with a 20 ms spread. The parabola gives ~1 ms spread |
+| Loudness | Level normalisation | Fixed gain | The mic's level depends on the room and where the hand is; results now don't |
+| Clock | Host clock for audio and beats; `SuspendingClock` to sleep | `ContinuousClock` like Tactus | Audio buffers are stamped on the host clock; both must be the same clock |
+| Constant delays | One calibration offset | Modelling each delay | Haptic delay, mic latency, detector bias and your own habit are all constant; one median removes them together |
+| Feedback | Live needle + summary | Summary only | Jih's choice: see it while playing, read it after |
+| Statistics | Medians and MAD | Means and standard deviation | A wrong note or a missed one shouldn't move the verdict |
+| The watch hearing itself | Checked during calibration; Silent Mode required | Filtering the click out | The click lands exactly on the beat, so filtering it would also remove on-beat notes |
+
 ## Docs and graph
 
 | Decision | Chosen | Instead of | Why |

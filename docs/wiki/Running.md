@@ -20,6 +20,19 @@ open Tactus.xcodeproj
 4. **Run.** Scheme **Tactus**, destination your Apple Watch, press **Run** (⌘R). The first install to a watch
    can take a few minutes.
 
+## Tactus Lab
+
+Same steps with the **TactusLab** scheme. It installs as its own app, *Tactus Lab*, next to Tactus.
+
+1. **Silent Mode on** (Control Center → bell). Otherwise the microphone hears the watch's own tap clicks.
+2. **Calibrate once** (tuning fork, top left): stay quiet for 4 taps, then play one key on each of 8 taps. It
+   says what it measured and saves it. Calibrate again if you change pianos or rooms.
+3. **Pick the grid** (top right): ♩ ♪ 3 ♬ for the notes you're playing.
+4. **Tap to start**, play after the 4-beat count-in, **tap to stop** for the summary.
+
+The first take asks for microphone access. A free Apple ID allows 3 apps of yours on the watch at once; Tactus
+and Lab are two of them.
+
 ## Every 7 days
 
 A free Personal Team signs apps for 7 days. After that, Tactus won't open. Connect the iPhone and press **Run**
@@ -31,7 +44,7 @@ again. Nothing is lost: tempo and feel are saved on the watch.
 swift test
 ```
 
-Runs the 12 tests in `Tests/TactusCoreTests` (beat clock and tempo rules) on the Mac. No watch or simulator
+Runs the 34 tests in `Tests/` (beat clock, tempo, meters, onset detector, timing analysis) on the Mac. No watch or simulator
 needed. GitHub Actions runs them, plus a full `xcodebuild` of the watch app, on every push
 (`.github/workflows/build.yml`).
 

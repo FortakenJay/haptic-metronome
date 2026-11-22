@@ -1,11 +1,14 @@
 # Tactus wiki
 
 Tactus is a metronome for Apple Watch that taps the beat on your wrist. Turn the crown to set the tempo, tap the
-screen to start and stop.
+screen to start and stop, and pick a meter, odd ones included. **Tactus Lab**, a separate app, listens to you play
+and measures where you rush and drag.
 
 | Page | What is in it |
 |---|---|
 | [How it works](How-it-works.md) | The beat loop, the clock, the wrist-down session, haptics |
+| [Meters](Meters.md) | Time signatures, groupings, which beats tap Strong, how /8 tempos count |
+| [Lab](Lab.md) | The rushing/dragging detector: onset detection, calibration, validation, limits |
 | [Interface](Interface.md) | The screen, and the interaction and accessibility rules it follows |
 | [Running it](Running.md) | Setup on a free Apple ID, tests, simulator, troubleshooting |
 | [Decisions](Decisions.md) | What was chosen over what, and why, by component |

@@ -1,29 +1,48 @@
 # Tactus: Architecture
 
-Status: **v1.0** (2026-11-20). One watch-only target, minimum watchOS 26.6 (the code needs 10). 12 core tests (`swift test`); the watch app is
-built by GitHub Actions on every push. Not yet felt on hardware at every tempo (see *Open* at the end).
+Status: **v1.1** (2026-11-21). Two watch-only apps from one project: **Tactus** (metronome, with meters) and
+**Tactus Lab** (rushing/dragging detector). Minimum watchOS 26.6 (the code needs 10). 34 tests (`swift test`); both
+apps are built by GitHub Actions on every push. Not yet felt on hardware at every tempo, and Lab not yet measured
+on a real piano (see *Open* at the end).
 
 ## Layers
 
 ```
-Tactus/
-├── Core/                     plain Swift, no WatchKit, tested by `swift test`
-│   ├── Tempo.swift           range 30–240, rounding, 60/BPM, Italian markings
-│   ├── BeatClock.swift       the schedule: nextBeat, beatPlayed(at:), setTempo(_:)
-│   └── Feel.swift            light | strong
-├── Metronome.swift           @Observable @MainActor: play state, beat loop, saved settings
+Core/                         plain Swift, no WatchKit, in both apps, tested by `swift test`
+├── Tempo.swift               range 30–240, rounding, 60/BPM, Italian markings
+├── BeatClock.swift           the schedule: nextBeat, beatPlayed(at:), setTempo(_:)
+├── Feel.swift                Tap (light | strong), Feel (light | strong)
+└── Meter.swift               time signatures, groupings, accents, tap(atBeat:feel:)
+Shared/                       WatchKit, in both apps
 ├── RuntimeSession.swift      WKExtendedRuntimeSession (mindfulness) wrapper
-├── Feel+Haptic.swift         Feel → WKHapticType
+└── Tap+Haptic.swift          Tap → WKHapticType
+Tactus/                       the metronome app
+├── TactusApp.swift           @main; owns the Metronome
+├── Metronome.swift           @Observable @MainActor: play state, beat loop, meter position, saved settings
 ├── MetronomeView.swift       the one screen
-└── TactusApp.swift           @main
-Support/Info.plist            WKApplication, WKBackgroundModes = [mindfulness]
-Package.swift                 test-only package over Tactus/Core
-Tests/TactusCoreTests/        BeatClockTests (6), TempoTests (6)
+├── MeterPicker.swift         time signature list
+└── BeatDots.swift            the bar, grouped
+LabCore/                      plain Swift + Accelerate, Lab only, tested by `swift test`
+├── OnsetDetector.swift       streaming spectral-flux onset detector
+└── TimingAnalyzer.swift      grid matching, TakeSummary, Calibration
+Lab/                          the Tactus Lab app
+├── LabApp.swift              @main; owns the LabSession
+├── LabSession.swift          count-in, click, takes, calibration
+├── AudioInput.swift          AVAudioEngine microphone tap → OnsetDetector (audio thread)
+├── LabView.swift, TimingNeedle.swift, SummaryView.swift
+Support/Info.plist            Tactus: WKApplication, WKBackgroundModes = [mindfulness]
+Support/Lab-Info.plist        Lab: + audio background mode, microphone usage text
+Package.swift                 test-only package: TactusCore (Core/), LabCore (LabCore/)
+Tests/TactusCoreTests/        BeatClock (6), Tempo (6), Meter (7)
+Tests/LabCoreTests/           OnsetDetector (6), TimingAnalyzer (9), synthetic piano generator
+research/onset-prototype/     the Python prototype the detector was tuned with
 ```
 
-**The rule:** anything that decides *when* or *what* goes in `Core/`, takes its inputs as arguments, and gets a
-test. The app layer only connects those decisions to WatchKit and SwiftUI. The Xcode target compiles `Core/`
-directly (same module), and `Package.swift` compiles the same files as `TactusCore` for tests.
+**The rule:** anything that decides *when* or *what* goes in `Core/` or `LabCore/`, takes its inputs as
+arguments, and gets a test. The app layers only connect those decisions to WatchKit, AVFoundation and SwiftUI.
+Each Xcode target compiles its folders directly (one module per app), and `Package.swift` compiles `Core/` and
+`LabCore/` as two modules for tests. **Tactus and Lab share only `Core/` and `Shared/`**: Lab has its own engine,
+so nothing done for Lab can change how the metronome behaves.
 
 ## State
 
@@ -34,7 +53,9 @@ view rebuild can never release it or its running session. The view reads it and 
 | Property | Type | Saved | Read by |
 |---|---|---|---|
 | `bpm` | `Int`, 30–240 | `UserDefaults` `tempo.bpm` | dial, crown binding, accessibility value |
-| `feel` | `Feel` | `UserDefaults` `tempo.feel` | toolbar button, `playBeat()` |
+| `feel` | `Feel` | `UserDefaults` `tempo.feel` | toolbar button, `playBeat()` (meter Off only) |
+| `meter` | `Meter` | `UserDefaults` `tempo.meter` (id, e.g. `7/8:2+2+3`) | meter button, picker, dots, subtitle, `playBeat()` |
+| `beatInBar` | `Int` | no | beat dots |
 | `isPlaying` | `Bool` | no | ring colour, status label, crown detent haptics |
 | `beatCount` | `Int` | no | ring flash trigger |
 | `notice` | `String?` | no | status, accessibility value |
@@ -49,6 +70,7 @@ Not observed (`@ObservationIgnored`): `clock`, `origin`, `loop`, `session`, `def
 | Playing | tap | Stopped | cancel loop; `session.end()` (forget, then invalidate) |
 | Playing | crown / VoiceOver adjust | Playing | `clock.setTempo`; restart loop; save `bpm` |
 | Stopped | crown / VoiceOver adjust | Stopped | save `bpm` |
+| any | meter picked | same | save `meter`; the next beat is beat 1 of a bar |
 | any | feel button | same | save `feel`; play a sample if Stopped |
 | Playing | session `expired` | Stopped | `notice = "Stopped after an hour"` |
 | Playing | session `interrupted`, app active, tries left | Playing | `session.begin()` again (3 tries per run) |
